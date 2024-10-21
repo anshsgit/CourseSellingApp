@@ -61,8 +61,14 @@ router.post('/login', async (req, res) => {
             const result = await bcrypt.compare(password, user.password);
 
             if(result) {
-                const token = jwt.sign({id: user._id}, userSecretKey);
-                res.status(200).json({token});
+                const token = jwt.sign({id: user._id}, userSecretKey, { expiresIn: '1h' });
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    maxAge: 60*60*1000,
+                    sameSite: 'strict',
+                    secure: process.env.NODE_ENV === 'production'
+                })
+                res.status(200).json({message: "Token sent in the cookie."});
 
             } else {
                 res.status(400).json({message: "Incorrect password."});
