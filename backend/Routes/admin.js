@@ -8,7 +8,6 @@ const {z} = require('zod');
 
 const {Admin, Course} = require('../Db/index')
 const {adminMiddleware} = require('../Authorization/index');
-const { application } = require('express');
 
 router.post('/signup', async (req, res) => {
     const requiredBody = z.object({
@@ -49,7 +48,7 @@ router.post('/signup', async (req, res) => {
     
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
     const requiredBody = z.object({
         username: z.string().min(3).max(50),
         password: z.string().min(3).max(50)
@@ -77,6 +76,7 @@ router.post('/login', async (req, res) => {
                     sameSite: 'strict',
                     secure: process.env.NODE_ENV === 'production'
                 })
+                req.token = token;
                 res.status(200).json({message: "Token sent in the cookie."});
             } else {
                 res.status(400).json({message: "Incorrect password."});
