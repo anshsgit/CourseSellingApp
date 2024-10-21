@@ -1,6 +1,9 @@
 const express = require('express');
 const app = express();
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
 
 require('dotenv').config();
 const { PORT } = require('./config')
