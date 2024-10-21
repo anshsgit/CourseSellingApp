@@ -2,13 +2,10 @@ const { adminSecretKey, userSecretKey} = require('../config');
 const jwt = require('jsonwebtoken');
 
 const adminMiddleware = (req, res, next) => {
-    const auth = req.headers.authorization;
-
-    if(auth.startsWith('Bearer')) {
-        const token = auth.split(' ');
+    const token = req.cookies.token;
 
         try {
-            const verify = jwt.verify(token[1], adminSecretKey);
+            const verify = jwt.verify(token, adminSecretKey);
         if(verify) {
             req.id = verify.id;
             next();
@@ -20,20 +17,14 @@ const adminMiddleware = (req, res, next) => {
             console.error('Error in verifying the token: ' +error);
             res.status(500).json({message: "Error in verifying the token."})
         }
-    } else {
-        res.status(400).json({message: "Authorization token missing or malformed."})
-    }
     
     
 }
 
 const userMiddleware = (req, res, next) => {
-    const auth = req.headers.authorization;
-
-    if(auth.startsWith('Bearer')) {
-    const token = auth.split(' ');
+    const token = req.cookies.token;
     try {
-        const verify = jwt.verify(token[1], userSecretKey);
+        const verify = jwt.verify(token, userSecretKey);
     if(verify) {
         req.id = verify.id;
         next();
@@ -45,9 +36,7 @@ const userMiddleware = (req, res, next) => {
         console.error('Error in verifying the token: ' +error);
         res.status(500).json({message: "Error in verifying the token."})
     }
-    } else {
-        res.status(400).json({message: "Authorization token missing or malformed."})
-    }
+    
     
 }
 
