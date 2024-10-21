@@ -10,6 +10,9 @@ const { PORT } = require('./config')
 
 const adminRouter = require('./Routes/admin');
 const userRouter = require('./Routes/user');
+const limitter = require('./rateLimitter');
+
+app.use(limitter);
 
 app.use(express.json());
 app.use('/admin', adminRouter);
