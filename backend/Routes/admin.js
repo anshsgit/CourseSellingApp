@@ -8,6 +8,7 @@ const {z} = require('zod');
 
 const {Admin, Course} = require('../Db/index')
 const {adminMiddleware} = require('../Authorization/index');
+const { application } = require('express');
 
 router.post('/signup', async (req, res) => {
     const requiredBody = z.object({
@@ -69,8 +70,14 @@ router.post('/login', async (req, res) => {
             const result = await bcrypt.compare(password, admin.password);
 
             if(result) {
-                const token = jwt.sign({id: admin._id}, adminSecretKey);
-                res.status(200).json({token});
+                const token = jwt.sign({id: admin._id}, adminSecretKey, { expiresIn: '1h' });
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    maxAge: 60*60*1000,
+                    sameSite: 'strict',
+                    secure: process.env.NODE_ENV === 'production'
+                })
+                res.status(200).json({message: "Token sent in the cookie."});
             } else {
                 res.status(400).json({message: "Incorrect password."});
             }
@@ -86,7 +93,7 @@ router.post('/login', async (req, res) => {
     
 });
 
-router.get('/course', adminMiddleware, async (req, res) => {
+router.get('/courses', adminMiddleware, async (req, res) => {
     try {
         const courses = await Course.find({});
         res.status(200).json({courses});
